@@ -8,7 +8,7 @@ from ..enums import OrderStatus
 class Position(BaseModel):
     """
     Attributes:
-        assset_id (UUID): ID of the asset.
+        asset_id (UUID): ID of the asset.
         symbol (str): Symbol of the asset.
         exchange (str): Exchange name of the asset.
         asset_class (str): Name of the asset's asset class.

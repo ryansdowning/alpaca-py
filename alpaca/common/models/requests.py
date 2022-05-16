@@ -60,6 +60,8 @@ class ClosePositionRequest(NonEmptyRequest):
                 "Only one of qty or percentage must be given to the ClosePositionRequest, got both."
             )
 
+        return values
+
 
 class GetPortfolioHistoryRequest(NonEmptyRequest):
     """
