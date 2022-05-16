@@ -3,7 +3,7 @@ import datetime
 from .models import ValidateBaseModel as BaseModel
 from typing import Optional
 from datetime import date
-from pydantic import validator
+from pydantic import root_validator
 from uuid import UUID
 
 
@@ -36,20 +36,45 @@ class NonEmptyRequest(BaseModel):
 
 
 class ClosePositionRequest(NonEmptyRequest):
-    """ """
+    """
+    Attributes:
+        qty (str): The number of shares to liquidate.
+        percentage (str): The percentage of shares to liquidate.
+    """
 
-    qty: str
-    percentage: str
+    qty: Optional[str]
+    percentage: Optional[str]
+
+    @root_validator()
+    def root_validator(cls, values: dict) -> dict:
+        if "qty" not in values or "percentage" not in values:
+            return values
+
+        if values["qty"] is None and values["percentage"] is None:
+            raise ValueError(
+                "qty or percentage must be given to the ClosePositionRequest, got None for both."
+            )
+
+        if values["qty"] is not None and values["percentage"] is not None:
+            raise ValueError(
+                "Only one of qty or percentage must be given to the ClosePositionRequest, got both."
+            )
 
 
 class GetPortfolioHistoryRequest(NonEmptyRequest):
-    """ """
+    """
+    Attributes:
+        period (Optional[str]): The duration of the data in number + unit, such as 1D. unit can be D for day, W for
+          week, M for month and A for year. Defaults to 1M.
+        timeframe (Optional[str]): The resolution of time window. 1Min, 5Min, 15Min, 1H, or 1D. If omitted, 1Min for
+          less than 7 days period, 15Min for less than 30 days, or otherwise 1D.
+        date_end (Optional[date]): The date the data is returned up to. Defaults to the current market date (rolls over
+          at the market open if extended_hours is false, otherwise at 7am ET).
+        extended_hours (Optional[bool]): If true, include extended hours in the result. This is effective only for
+          timeframe less than 1D.
+    """
 
     period: Optional[str]
     timeframe: Optional[str]
     date_end: Optional[date]
     extended_hours: Optional[bool]
-
-    @validator("date_end", pre=True)
-    def parse_date_end(cls, value):
-        return datetime.strptime(value, "%Y-%m-%d").date()
